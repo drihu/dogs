@@ -11,14 +11,14 @@ function Dog({ image }) {
 
 function App() {
   const [options, setOptions] = useState(null);
-  const [breed, setBreed] = useState('');
+  const [query, setQuery] = useState('');
   const [dogImages, setDogImages] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const handleChange = (event) => {
     const select = event.target;
     setLoading(true);
-    setBreed(select.value);
+    setQuery(select.value);
   };
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!breed) {
+    if (!query) {
       Promise.all(
         [...Array(12)].map(() =>
           fetch('https://dog.ceo/api/breeds/image/random')
@@ -43,14 +43,14 @@ function App() {
       return;
     }
 
-    fetch(`https://dog.ceo/api/breed/${breed}/images`)
+    fetch(`https://dog.ceo/api/breed/${query}/images`)
       .then((res) => res.json())
       .then((data) => data.message)
       .then((urls) => {
         setLoading(false);
         setDogImages(urls);
       });
-  }, [breed]);
+  }, [query]);
 
   return (
     <div className="app">
@@ -63,7 +63,7 @@ function App() {
       <main className="main">
         <div className="container">
           <select
-            value={breed}
+            value={query}
             onChange={handleChange}
             className="main__select"
           >
