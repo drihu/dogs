@@ -12,14 +12,8 @@ function Dog({ image }) {
 function App() {
   const [options, setOptions] = useState(null);
   const [query, setQuery] = useState('');
-  const [dogImages, setDogImages] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const handleChange = (event) => {
-    const select = event.target;
-    setLoading(true);
-    setQuery(select.value);
-  };
+  const [dogImages, setDogImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetch('https://dog.ceo/api/breeds/list/all')
@@ -29,6 +23,8 @@ function App() {
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
+
     if (!query) {
       Promise.all(
         [...Array(12)].map(() =>
@@ -37,8 +33,8 @@ function App() {
             .then((data) => data.message)
         )
       ).then((urls) => {
-        setLoading(false);
         setDogImages(urls);
+        setIsLoading(false);
       });
       return;
     }
@@ -47,8 +43,8 @@ function App() {
       .then((res) => res.json())
       .then((data) => data.message)
       .then((urls) => {
-        setLoading(false);
         setDogImages(urls);
+        setIsLoading(false);
       });
   }, [query]);
 
@@ -64,7 +60,7 @@ function App() {
         <div className="container">
           <select
             value={query}
-            onChange={handleChange}
+            onChange={(event) => setQuery(event.target.value)}
             className="main__select"
           >
             <option value="">select a breed</option>
@@ -76,7 +72,7 @@ function App() {
               ))}
           </select>
 
-          {loading ? (
+          {isLoading ? (
             <div className="notice">Loading...</div>
           ) : (
             <div className="main__dogs">
