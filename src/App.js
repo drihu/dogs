@@ -10,19 +10,21 @@ function Dog({ image }) {
 }
 
 function App() {
-  const [options, setOptions] = useState(null);
+  // const [options, setOptions] = useState(null);
   const [query, setQuery] = useState('');
   const [dogImages, setDogImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  // useEffect(() => {
+  //   fetch('https://dog.ceo/api/breeds/list/all')
+  //     .then((res) => res.json())
+  //     .then((data) => Object.keys(data.message))
+  //     .then((breeds) => setOptions(breeds));
+  // }, []);
 
   useEffect(() => {
-    fetch('https://dog.ceo/api/breeds/list/all')
-      .then((res) => res.json())
-      .then((data) => Object.keys(data.message))
-      .then((breeds) => setOptions(breeds));
-  }, []);
-
-  useEffect(() => {
+    setIsError(false);
     setIsLoading(true);
 
     if (!query) {
@@ -39,13 +41,26 @@ function App() {
       return;
     }
 
-    fetch(`https://dog.ceo/api/breed/${query}/images`)
-      .then((res) => res.json())
-      .then((data) => data.message)
-      .then((urls) => {
-        setDogImages(urls);
-        setIsLoading(false);
-      });
+    const fetchDogs = () => {
+      return fetch(`https://dog.ceo/api/breed/${query}/images`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === 'success') return data.message;
+          else throw new Error(data.message);
+        })
+        .then((urls) => {
+          setDogImages(urls);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.log(error);
+          setIsError(true);
+          setIsLoading(false);
+        });
+    };
+
+    const timerId = setTimeout(fetchDogs, 1000);
+    return () => clearTimeout(timerId);
   }, [query]);
 
   return (
@@ -58,7 +73,7 @@ function App() {
 
       <main className="main">
         <div className="container">
-          <select
+          {/* <select
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             className="main__select"
@@ -70,9 +85,19 @@ function App() {
                   {option}
                 </option>
               ))}
-          </select>
+          </select> */}
 
-          {isLoading ? (
+          <input
+            type="text"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search for a breed"
+            className="main__select"
+          />
+
+          {isError ? (
+            <div className="error">No results found</div>
+          ) : isLoading ? (
             <div className="notice">Loading...</div>
           ) : (
             <div className="main__dogs">
